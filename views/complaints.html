@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complaints - CityPlus</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .stats-dashboard {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      width: 220px;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    
+    .stats-card {
+      border-left: 4px solid;
+      transition: transform 0.3s;
+    }
+    
+    .stats-card:hover {
+      transform: translateY(-3px);
+    }
+    
+    .stat-icon {
+      font-size: 1.5rem;
+      opacity: 0.7;
+    }
+    
+    @media (max-width: 992px) {
+      .stats-dashboard {
+        position: relative;
+        top: 0;
+        right: 0;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <span class="text-light">City</span><span class="text-light">Plus</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/complaints">Complaints</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/submit">Submit</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/map">Map</a>
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/contact">Contact</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown">
+              <i class="fas fa-user-circle me-1"></i>
+              <span id="account-email">Guest</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><span class="dropdown-item-text" id="account-type">Not logged in</span></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" id="logout-btn">Logout</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-5 position-relative">
+    <!-- Stats Dashboard -->
+    <div class="stats-dashboard">
+      <h5 class="text-center mb-3">Complaints Statistics</h5>
+      <div class="card stats-card mb-2" style="border-left-color: #0d6efd;">
+        <div class="card-body p-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="text-muted mb-0">Total</h6>
+              <h5 class="mt-1 mb-0" id="total-complaints">0</h5>
+            </div>
+            <div class="stat-icon text-primary">
+              <i class="fas fa-clipboard-list"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card stats-card mb-2" style="border-left-color: #ffc107;">
+        <div class="card-body p-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="text-muted mb-0">Pending</h6>
+              <h5 class="mt-1 mb-0" id="pending-complaints">0</h5>
+            </div>
+            <div class="stat-icon text-warning">
+              <i class="fas fa-clock"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card stats-card mb-2" style="border-left-color: #0dcaf0;">
+        <div class="card-body p-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="text-muted mb-0">In Progress</h6>
+              <h5 class="mt-1 mb-0" id="progress-complaints">0</h5>
+            </div>
+            <div class="stat-icon text-info">
+              <i class="fas fa-spinner"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card stats-card" style="border-left-color: #198754;">
+        <div class="card-body p-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="text-muted mb-0">Resolved</h6>
+              <h5 class="mt-1 mb-0" id="resolved-complaints">0</h5>
+            </div>
+            <div class="stat-icon text-success">
+              <i class="fas fa-check-circle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <h2 class="text-center mb-4">All Complaints</h2>
+    <div id="complaintsMessage" class="alert d-none" role="alert"></div>
+    <div class="row" id="complaintsList">
+      <!-- Complaints will be dynamically inserted here -->
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white py-4">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5><span class="text-light">City</span><span class="text-light">Plus</span></h5>
+          <p>Making communities better through collaboration</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p>© 2025 CityPlus. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Complaint Image</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="modalImage" src="" class="img-fluid" alt="Enlarged Complaint Image">
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const complaintsMessage = document.getElementById('complaintsMessage');
+      const complaintsList = document.getElementById('complaintsList');
+      let userType = '';
+
+      // Stats elements
+      const totalComplaintsEl = document.getElementById('total-complaints');
+      const pendingComplaintsEl = document.getElementById('pending-complaints');
+      const progressComplaintsEl = document.getElementById('progress-complaints');
+      const resolvedComplaintsEl = document.getElementById('resolved-complaints');
+
+      const checkAuth = () => {
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+          complaintsMessage.classList.remove('d-none', 'alert-success');
+          complaintsMessage.classList.add('alert-danger');
+          complaintsMessage.textContent = 'Please log in to view complaints.';
+          setTimeout(() => window.location.href = '/login', 1000);
+          return false;
+        }
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          userType = payload.userType;
+          console.log('Current user type:', userType);
+          return true;
+        } catch (error) {
+          console.error('Error decoding token:', error);
+          alert('Invalid token. Please log in again.');
+          localStorage.removeItem('jwtToken');
+          setTimeout(() => window.location.href = '/login', 1000);
+          return false;
+        }
+      };
+
+      // Populate account details
+      const populateAccountDetails = () => {
+        const token = localStorage.getItem('jwtToken');
+        const accountEmail = document.getElementById('account-email');
+        const accountType = document.getElementById('account-type');
+        if (token) {
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            accountEmail.textContent = payload.email;
+            accountType.textContent = `Role: ${payload.userType}`;
+          } catch (error) {
+            console.error('Error decoding token for account details:', error);
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/login';
+          }
+        }
+      };
+
+      // Update the statistics
+      const updateStatistics = (complaints) => {
+        const total = complaints.length;
+        const pending = complaints.filter(c => c.status === 'Pending').length;
+        const inProgress = complaints.filter(c => c.status === 'In Progress').length;
+        const resolved = complaints.filter(c => c.status === 'Resolved').length;
+        
+        // Animate the numbers
+        animateNumber(totalComplaintsEl, total);
+        animateNumber(pendingComplaintsEl, pending);
+        animateNumber(progressComplaintsEl, inProgress);
+        animateNumber(resolvedComplaintsEl, resolved);
+      };
+      
+      // Animate number from 0 to target value
+      const animateNumber = (element, target) => {
+        const duration = 1000; // animation duration in ms
+        const frameRate = 60; // frames per second
+        const increment = target / (duration / 1000 * frameRate);
+        let current = 0;
+        
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            clearInterval(timer);
+            element.textContent = target;
+          } else {
+            element.textContent = Math.floor(current);
+          }
+        }, 1000 / frameRate);
+      };
+
+      // Logout functionality
+      const setupLogout = () => {
+        document.getElementById('logout-btn').addEventListener('click', (e) => {
+          e.preventDefault();
+          fetch('/api/logout', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+            }
+          })
+            .then(response => response.json())
+            .then(data => {
+              localStorage.removeItem('jwtToken');
+              alert('Logged out successfully.');
+              window.location.href = '/login';
+            })
+            .catch(error => {
+              console.error('Error logging out:', error);
+              localStorage.removeItem('jwtToken');
+              alert('Error logging out. Redirecting to login...');
+              window.location.href = '/login';
+            });
+        });
+      };
+
+      const updateComplaintStatus = async (complaintId, status, button) => {
+        try {
+          console.log(`Updating complaint ${complaintId} to status: ${status}`);
+          button.disabled = true;
+          button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...';
+          
+          const response = await fetch(`/api/complaints/${complaintId}/status`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status })
+          });
+
+          console.log('Status update response:', response);
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Status update error response:', errorText);
+            throw new Error(`Server returned ${response.status}: ${errorText}`);
+          }
+
+          const data = await response.json();
+          console.log('Status update data:', data);
+          
+          if (data.success) {
+            complaintsMessage.classList.remove('d-none', 'alert-danger');
+            complaintsMessage.classList.add('alert-success');
+            complaintsMessage.textContent = 'Status updated successfully';
+            
+            // Scroll to top to show the message
+            window.scrollTo(0, 0);
+            
+            setTimeout(() => {
+              complaintsMessage.classList.add('d-none');
+              fetchComplaints(); // Refresh the list
+            }, 3000);
+          } else {
+            throw new Error(data.message || 'Failed to update status');
+          }
+        } catch (error) {
+          console.error('Error updating status:', error);
+          complaintsMessage.classList.remove('d-none', 'alert-success');
+          complaintsMessage.classList.add('alert-danger');
+          complaintsMessage.textContent = `Error: ${error.message}`;
+          
+          // Scroll to top to show the error message
+          window.scrollTo(0, 0);
+          
+          setTimeout(() => complaintsMessage.classList.add('d-none'), 5000);
+        } finally {
+          button.disabled = false;
+          button.textContent = 'Update';
+        }
+      };
+
+      const setupStatusUpdateHandlers = () => {
+        document.querySelectorAll('.status-btn').forEach(button => {
+          button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const complaintId = button.getAttribute('data-complaint-id');
+            const selectElement = document.getElementById(`status-${complaintId}`);
+            const status = selectElement.value;
+            console.log(`Status button clicked for complaint ${complaintId}, new status: ${status}`);
+            updateComplaintStatus(complaintId, status, button);
+          });
+        });
+      };
+
+      const getStatusBadgeClass = (status) => {
+        switch (status) {
+          case 'Pending':
+            return 'bg-warning text-dark';
+          case 'In Progress':
+            return 'bg-info text-dark';
+          case 'Resolved':
+            return 'bg-success';
+          default:
+            return 'bg-secondary';
+        }
+      };
+
+      const renderComplaints = (complaints) => {
+        complaintsList.innerHTML = ''; // Clear existing content
+        
+        if (complaints.length === 0) {
+          complaintsMessage.classList.remove('d-none', 'alert-danger');
+          complaintsMessage.classList.add('alert-info');
+          complaintsMessage.textContent = 'No complaints found.';
+          return;
+        }
+        
+        // Update statistics dashboard
+        updateStatistics(complaints);
+        
+        complaints.forEach(complaint => {
+          try {
+            const location = JSON.parse(complaint.location || '{}');
+            
+            const card = document.createElement('div');
+            card.className = 'col-md-6 mb-4';
+            
+            // Format date for better readability
+            const createdDate = new Date(complaint.created_at).toLocaleString();
+            
+            card.innerHTML = `
+              <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title">${complaint.title}</h5>
+                  <p class="card-text">${complaint.description}</p>
+                  <p class="card-text"><strong>Address:</strong> ${location.address || 'N/A'}</p>
+                 ${complaint.image_url ? `
+  <div class="mb-3 card-img-container" style="height: 200px; overflow: hidden; border-radius: 5px; cursor: pointer;" 
+       data-bs-toggle="modal" data-bs-target="#imageModal" onclick="showImageModal('${complaint.image_url}')">
+    <img src="${complaint.image_url}" 
+         class="img-fluid h-100 w-100 object-fit-cover" 
+         alt="Complaint Image">
+  </div>
+` : ''}
+                  
+                  <div class="d-flex align-items-center mb-2">
+                    <strong class="me-2">Status:</strong>
+                    <span class="badge ${getStatusBadgeClass(complaint.status)}">${complaint.status}</span>
+                  </div>
+                  
+                  ${userType === 'admin' ? `
+                    <div class="mb-3 p-3 bg-light rounded">
+                      <label for="status-${complaint.id}" class="form-label fw-bold">Update Status:</label>
+                      <div class="input-group">
+                        <select id="status-${complaint.id}" class="form-select">
+                          <option value="Pending" ${complaint.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                          <option value="In Progress" ${complaint.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                          <option value="Resolved" ${complaint.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                        </select>
+                        <button class="btn btn-primary status-btn" data-complaint-id="${complaint.id}">Update</button>
+                      </div>
+                    </div>
+                  ` : ''}
+                  
+                  <div class="mt-auto">
+                    <p class="card-text"><strong>Submitted By:</strong> ${complaint.submitted_by}</p>
+                    <p class="card-text mb-0"><small class="text-muted">Created: ${createdDate}</small></p>
+                  </div>
+                </div>
+              </div>
+            `;
+            
+            complaintsList.appendChild(card);
+          } catch (error) {
+            console.error(`Error rendering complaint ${complaint.id}:`, error);
+          }
+        });
+        
+        // Setup event handlers for the newly rendered complaints
+        setupStatusUpdateHandlers();
+      };
+
+      const fetchComplaints = async () => {
+        try {
+          complaintsMessage.classList.add('d-none'); // Hide any previous messages
+          
+          const token = localStorage.getItem('jwtToken');
+          console.log('Fetching complaints with token:', token ? 'Token exists' : 'No token');
+          
+          const response = await fetch('/api/complaints', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          console.log('Response status:', response.status);
+          
+          if (response.status === 401 || response.status === 403) {
+            console.error('Authentication error:', response.status);
+            alert('Session expired or invalid token. Please log in again.');
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/login';
+            return;
+          }
+
+          const contentType = response.headers.get('Content-Type');
+          if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Non-JSON response:', text);
+            throw new Error('Unexpected response format from server');
+          }
+
+          const data = await response.json();
+          console.log('Complaints data received:', data);
+
+          if (data.success && data.complaints) {
+            renderComplaints(data.complaints);
+          } else {
+            throw new Error(data.message || 'Failed to fetch complaints');
+          }
+        } catch (error) {
+          console.error('Error fetching complaints:', error);
+          complaintsMessage.classList.remove('d-none', 'alert-success');
+          complaintsMessage.classList.add('alert-danger');
+          complaintsMessage.textContent = `Error: ${error.message}. Please try again or log in if needed.`;
+        }
+      };
+
+      // Initialize the page
+      const init = () => {
+        if (checkAuth()) {
+          populateAccountDetails();
+          setupLogout();
+          fetchComplaints();
+        }
+      };
+
+      init();
+    });
+    function showImageModal(imageUrl) {
+  document.getElementById('modalImage').src = imageUrl;
+}
+  </script>
+</body>
+</html>

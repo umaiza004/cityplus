@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Events & News - CityPlus</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .event-card {
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .event-card:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <span class="text-light">City</span><span class="text-light">Plus</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/complaints">Complaints</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/submit">Submit</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/map">Map</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/events-news">Events & News</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/contact">Contact</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown">
+              <i class="fas fa-user-circle me-1"></i>
+              <span id="account-email">Guest</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><span class="dropdown-item-text" id="account-type">Not logged in</span></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" id="logout-btn">Logout</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-5">
+    <h2 class="text-center mb-4">Events & News</h2>
+
+    <!-- Admin Form (Visible to Admins Only) -->
+    <div id="adminForm" class="card mb-4 d-none">
+      <div class="card-body">
+        <h5 class="card-title">Add Event</h5>
+        <form id="addEventForm" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="eventTitle" class="form-label">Title <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="eventTitle" name="title" required>
+          </div>
+          <div class="mb-3">
+            <label for="eventDate" class="form-label">Date <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" id="eventDate" name="date" required>
+          </div>
+          <div class="mb-3">
+            <label for="eventTime" class="form-label">Time</label>
+            <input type="time" class="form-control" id="eventTime" name="time">
+          </div>
+          <div class="mb-3">
+            <label for="eventLocation" class="form-label">Location</label>
+            <input type="text" class="form-control" id="eventLocation" name="location">
+          </div>
+          <div class="mb-3">
+            <label for="eventImage" class="form-label">Event Image</label>
+            <input type="file" class="form-control" id="eventImage" name="image" accept="image/*">
+            <small class="form-text text-muted">Max file size: 5MB. Only image files allowed.</small>
+          </div>
+          <div class="mb-3">
+            <label for="eventDescription" class="form-label">Description <span class="text-danger">*</span></label>
+            <textarea class="form-control" id="eventDescription" name="description" rows="4" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Event</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Events List -->
+    <div class="row" id="eventsList">
+      <div class="col-12 text-center">
+        <p>Loading events...</p>
+      </div>
+    </div>
+
+    <!-- Volunteer Sign-Up Form (Visible to Residents Only) -->
+    <div id="volunteerFormSection" class="card mt-5 d-none">
+      <div class="card-body">
+        <h5 class="card-title">Volunteer for Event Organizing</h5>
+        <p>Want to help organize an upcoming event? Sign up below!</p>
+        <form id="volunteerForm">
+          <div class="mb-3">
+            <label for="volunteerName" class="form-label">Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="volunteerName" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="volunteerEmail" class="form-label">Email <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" id="volunteerEmail" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="volunteerEvent" class="form-label">Event to Volunteer For <span class="text-danger">*</span></label>
+            <select class="form-control" id="volunteerEvent" name="event_id" required>
+              <option value="">Select an event</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="volunteerRole" class="form-label">Role/Skills (Optional)</label>
+            <textarea class="form-control" id="volunteerRole" name="role" rows="2" placeholder="E.g., 'I can help with logistics' or 'Skilled in event promotion'"></textarea>
+          </div>
+          <button type="submit" class="btn btn-success">Sign Up to Volunteer</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Volunteer List (Visible to Admins Only) -->
+    <div id="volunteerListSection" class="card mt-5 d-none">
+      <div class="card-body">
+        <h5 class="card-title">Volunteer List</h5>
+        <div id="volunteerList">
+          <p>Loading volunteers...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white py-4">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5><span class="text-light">City</span><span class="text-light">Plus</span></h5>
+          <p>Making communities better through collaboration</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p>© 2025 CityPlus. All rights reserved.</p>
+          <div class="social-icons mt-3">
+            <a href="https://www.facebook.com/" target="_blank" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.twitter.com/" target="_blank" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.instagram.com/uuhhhmaiza" target="_blank" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.linkedin.com/company/" target="_blank" class="text-white"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      // Set active class for navbar
+      const currentPath = window.location.pathname;
+      document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === currentPath || (href === '/' && currentPath === '')) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+
+      // Account details and logout
+      const token = localStorage.getItem('jwtToken');
+      const accountEmail = document.getElementById('account-email');
+      const accountType = document.getElementById('account-type');
+      const adminForm = document.getElementById('adminForm');
+      const volunteerFormSection = document.getElementById('volunteerFormSection');
+      const volunteerListSection = document.getElementById('volunteerListSection');
+      const logoutBtn = document.getElementById('logout-btn');
+
+      let userRole = 'guest';
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          accountEmail.textContent = payload.email;
+          accountType.textContent = `Role: ${payload.userType}`;
+          userRole = payload.userType;
+          if (payload.userType === 'admin') {
+            adminForm.classList.remove('d-none');
+            volunteerListSection.classList.remove('d-none');
+            fetchVolunteers();
+          } else if (payload.userType === 'resident') {
+            volunteerFormSection.classList.remove('d-none');
+          }
+        } catch (error) {
+          console.error('Error decoding token:', error);
+        }
+      }
+
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.removeItem('jwtToken');
+          alert('Logged out successfully.');
+          window.location.href = '/';
+        });
+      }
+
+      // Fetch events
+      async function fetchEvents() {
+        try {
+          const response = await fetch('/api/events-news');
+          const data = await response.json();
+          const eventsList = document.getElementById('eventsList');
+          const volunteerEventSelect = document.getElementById('volunteerEvent');
+          if (data.success && data.items.length) {
+            eventsList.innerHTML = data.items.map(item => `
+              <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm event-card" onclick="window.location.href='/event-details?id=${item.id}'">
+                  <img src="${item.image_url || '/images/default-event.jpg'}" class="card-img-top" alt="${item.title}" style="height: 200px; object-fit: cover;" onerror="this.src='/images/default-event.jpg'; console.log('Image failed to load: ${item.image_url}');">
+                  <div class="card-body">
+                    <h5 class="card-title">${item.title}</h5>
+                    <p class="card-text">${item.description.substring(0, 100)}...</p>
+                    <p><strong>Date:</strong> ${new Date(item.date).toLocaleDateString()}</p>
+                    ${item.time ? `<p><strong>Time:</strong> ${item.time}</p>` : ''}
+                    ${item.location ? `<p><strong>Location:</strong> ${item.location}</p>` : ''}
+                  </div>
+                </div>
+              </div>
+            `).join('');
+
+            // Populate volunteer form dropdown with upcoming events
+            const currentDate = new Date();
+            const upcomingEvents = data.items.filter(item => new Date(item.date) >= currentDate);
+            volunteerEventSelect.innerHTML = '<option value="">Select an event</option>' + 
+              upcomingEvents.map(item => `
+                <option value="${item.id}">${item.title} (${new Date(item.date).toLocaleDateString()})</option>
+              `).join('');
+          } else {
+            eventsList.innerHTML = '<div class="col-12"><p>No events available.</p></div>';
+            volunteerEventSelect.innerHTML = '<option value="">No upcoming events</option>';
+          }
+        } catch (error) {
+          console.error('Error fetching events:', error);
+          eventsList.innerHTML = '<div class="col-12"><p>Error loading events.</p></div>';
+        }
+      }
+      fetchEvents();
+
+      // Fetch volunteers (for admins only)
+      async function fetchVolunteers() {
+        try {
+          const response = await fetch('/api/volunteers', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await response.json();
+          const volunteerList = document.getElementById('volunteerList');
+          if (data.success && data.volunteers.length) {
+            volunteerList.innerHTML = data.volunteers.map(vol => `
+              <div class="card mb-2">
+                <div class="card-body">
+                  <p><strong>Name:</strong> ${vol.name}</p>
+                  <p><strong>Email:</strong> ${vol.email}</p>
+                  <p><strong>Event ID:</strong> ${vol.event_id}</p>
+                  <p><strong>Role:</strong> ${vol.role || 'Not specified'}</p>
+                  <p><strong>Joined:</strong> ${new Date(vol.created_at).toLocaleString()}</p>
+                </div>
+              </div>
+            `).join('');
+          } else {
+            volunteerList.innerHTML = '<p>No volunteers registered yet.</p>';
+          }
+        } catch (error) {
+          console.error('Error fetching volunteers:', error);
+          volunteerList.innerHTML = '<p>Error loading volunteers.</p>';
+        }
+      }
+
+      // Handle admin form submission
+      const addEventForm = document.getElementById('addEventForm');
+      if (addEventForm) {
+        addEventForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          // Collect form data
+          const title = document.getElementById('eventTitle').value.trim();
+          const date = document.getElementById('eventDate').value;
+          const time = document.getElementById('eventTime').value;
+          const location = document.getElementById('eventLocation').value.trim();
+          const description = document.getElementById('eventDescription').value.trim();
+          const imageFile = document.getElementById('eventImage').files[0];
+
+          // Client-side validation
+          if (!title || !date || !description) {
+            alert('Please fill in all required fields: Title, Date, and Description.');
+            return;
+          }
+
+          // Create FormData
+          const formData = new FormData();
+          formData.append('title', title);
+          formData.append('type', 'event');
+          formData.append('date', date);
+          if (time) formData.append('time', time);
+          if (location) formData.append('location', location);
+          formData.append('description', description);
+          if (imageFile) {
+            formData.append('image', imageFile);
+          }
+
+          try {
+            const response = await fetch('/api/events-news', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`
+              },
+              body: formData
+            });
+            const data = await response.json();
+            if (data.success) {
+              alert('Event added successfully!');
+              addEventForm.reset();
+              fetchEvents();
+            } else {
+              alert('Error adding event: ' + (data.message || 'Unknown error'));
+            }
+          } catch (error) {
+            console.error('Error adding event:', error);
+            alert('Error adding event: ' + error.message);
+          }
+        });
+      }
+
+      // Handle volunteer form submission
+      const volunteerForm = document.getElementById('volunteerForm');
+      if (volunteerForm && userRole === 'resident') {
+        volunteerForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          const name = document.getElementById('volunteerName').value.trim();
+          const email = document.getElementById('volunteerEmail').value.trim();
+          const eventId = document.getElementById('volunteerEvent').value;
+          const role = document.getElementById('volunteerRole').value.trim();
+
+          // Client-side validation
+          if (!name || !email || !eventId) {
+            alert('Please fill in all required fields: Name, Email, and Event.');
+            return;
+          }
+
+          const volunteerData = {
+            name,
+            email,
+            event_id: eventId,
+            role: role || null
+          };
+
+          try {
+            const response = await fetch('/api/volunteers', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify(volunteerData)
+            });
+            const data = await response.json();
+            if (data.success) {
+              alert('Thank you for volunteering! We will contact you soon.');
+              volunteerForm.reset();
+            } else {
+              alert('Error submitting volunteer form: ' + (data.message || 'Unknown error'));
+            }
+          } catch (error) {
+            console.error('Error submitting volunteer form:', error);
+            alert('Error submitting volunteer form: ' + error.message);
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - CityPlus</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"> <!-- Added Font Awesome CSS -->
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <span class="text-light">City</span><span class="text-light">Plus</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/complaints">Complaints</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/submit">Submit</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/map">Map</a>
+          </li>
+           
+          <li class="nav-item">
+            <a class="nav-link active" href="/contact">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-5">
+    <div class="row mb-5">
+      <div class="col-12 text-center">
+        <h1 class="animate__animated animate__fadeIn">Contact Us</h1>
+        <p class="lead">Get in touch with our team for any questions or concerns</p>
+      </div>
+    </div>
+
+    <div class="row g-5 animate__animated animate__fadeIn animate__delay-1s">
+      <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-body p-4">
+            <h3 class="card-title mb-4">Send Us a Message</h3>
+            <form id="contact-form">
+              <div class="mb-3">
+                <label for="name" class="form-label">Your Name</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+              </div>
+              
+              <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+              </div>
+              
+              <div class="mb-3">
+                <label for="phone" class="form-label">Phone Number (Optional)</label>
+                <input type="tel" class="form-control" id="phone" name="phone">
+              </div>
+              
+              <div class="mb-3">
+                <label for="subject" class="form-label">Subject</label>
+                <select class="form-select" id="subject" name="subject" required>
+                  <option value="" selected disabled>Select a subject</option>
+                  <option value="General Inquiry">General Inquiry</option>
+                  <option value="Complaint Follow-up">Complaint Follow-up</option>
+                  <option value="Technical Support">Technical Support</option>
+                  <option value="Partnership Opportunity">Partnership Opportunity</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              
+              <div class="mb-4">
+                <label for="message" class="form-label">Your Message</label>
+                <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+              </div>
+              
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Send Message</button>
+              </div>
+            </form>
+            
+            <div class="alert alert-success mt-4 d-none" id="contact-success">
+              <strong>Thank you!</strong> Your message has been sent successfully. We'll get back to you soon.
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-6">
+        <div class="card shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h3 class="card-title mb-4">Contact Information</h3>
+            
+            <div class="d-flex mb-4">
+              <div class="contact-icon me-3">
+                <i class="fas fa-map-marker-alt fa-2x text-primary"></i>
+              </div>
+              <div>
+                <h5>Office Address</h5>
+                <p class="mb-0">123 Community Way, Cityville, ST 12345</p>
+              </div>
+            </div>
+            
+            <div class="d-flex mb-4">
+              <div class="contact-icon me-3">
+                <i class="fas fa-phone-alt fa-2x text-primary"></i>
+              </div>
+              <div>
+                <h5>Phone</h5>
+                <p class="mb-0">(555) 123-4567</p>
+                <p class="text-muted small mb-0">Mon - Fri, 9am - 5pm</p>
+              </div>
+            </div>
+            
+            <div class="d-flex mb-4">
+              <div class="contact-icon me-3">
+                <i class="fas fa-envelope fa-2x text-primary"></i>
+              </div>
+              <div>
+                <h5>Email</h5>
+                <p class="mb-0">support@cityplus.example</p>
+                <p class="text-muted small mb-0">We'll respond within 24 hours</p>
+              </div>
+            </div>
+            
+            <div class="mt-5">
+              <h5>Follow Us</h5>
+              <div class="social-icons mt-3">
+                <a href="#" class="me-3"><i class="fab fa-facebook-f fa-2x"></i></a> <!-- Removed text-primary -->
+                <a href="#" class="me-3"><i class="fab fa-twitter fa-2x"></i></a>
+                <a href="#" class="me-3"><i class="fab fa-instagram fa-2x"></i></a>
+                <a href="#" class="text-primary"><i class="fab fa-linkedin-in fa-2x"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <h3 class="card-title mb-4">Office Hours</h3>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item d-flex justify-content-between px-0">
+                <span>Monday - Friday</span>
+                <span>9:00 AM - 5:00 PM</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between px-0">
+                <span>Saturday</span>
+                <span>10:00 AM - 2:00 PM</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between px-0">
+                <span>Sunday</span>
+                <span>Closed</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white py-4 mt-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5><span class="text-light">City</span><span class="text-light">Plus</span></h5>
+          <p>Making communities better through collaboration</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p>© 2025 CityPlus. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <script>
+    document.getElementById('contact-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Simulate form submission
+      setTimeout(() => {
+        this.reset();
+        document.getElementById('contact-success').classList.remove('d-none');
+        
+        setTimeout(() => {
+          document.getElementById('contact-success').classList.add('d-none');
+        }, 5000);
+      }, 1500);
+    });
+  </script>
+</body>
+</html>

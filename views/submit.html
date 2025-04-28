@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit Complaint - CityPlus</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">CityPlus</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="/complaints">Complaints</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/submit">Submit</a></li>
+          <li class="nav-item"><a class="nav-link" href="/map">Map</a></li>
+           
+          <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white" href="#" id="accountDropdown" data-bs-toggle="dropdown">
+              <i class="fas fa-user-circle me-1"></i>
+              <span id="account-email">Guest</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><span class="dropdown-item-text" id="account-type">Not logged in</span></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" id="logout-btn">Logout</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Form -->
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card shadow-sm animate__animated animate__fadeIn">
+          <div class="card-body p-5">
+            <h2 class="text-center mb-4">Submit a Complaint</h2>
+            <div id="submitMessage" class="alert d-none" role="alert"></div>
+            <form id="submitForm" enctype="multipart/form-data">
+              <div class="mb-3">
+                <label for="title" class="form-label">Complaint Title</label>
+                <input type="text" class="form-control" id="title" placeholder="Enter complaint title" required>
+              </div>
+              <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" rows="3" placeholder="Describe the issue" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="address" class="form-label">Address</label>
+                <input type="text" class="form-control" id="address" placeholder="Enter address" required>
+              </div>
+              <div class="mb-3">
+                <label for="image" class="form-label">Upload Image (optional)</label>
+                <input type="file" class="form-control" id="image" name="image" accept="image/*">
+              </div>
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">Submit Complaint</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white py-4">
+    <div class="container d-flex justify-content-between flex-column flex-md-row">
+      <div><h5>CityPlus</h5><p>Making communities better through collaboration</p></div>
+      <div class="text-md-end"><p>© 2025 CityPlus. All rights reserved.</p></div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('jwtToken');
+      const accountEmail = document.getElementById('account-email');
+      const accountType = document.getElementById('account-type');
+      const submitMessage = document.getElementById('submitMessage');
+
+      // Auth check
+      const isAuthenticated = () => {
+        if (!token) return false;
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          accountEmail.textContent = payload.email;
+          accountType.textContent = `Role: ${payload.userType}`;
+          return true;
+        } catch {
+          return false;
+        }
+      };
+
+      if (!isAuthenticated()) {
+        submitMessage.classList.remove('d-none', 'alert-success');
+        submitMessage.classList.add('alert-danger');
+        submitMessage.textContent = 'Please log in to submit a complaint.';
+        setTimeout(() => window.location.href = '/login', 1500);
+        return;
+      }
+
+      // Logout
+      document.getElementById('logout-btn').addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+          await fetch('/api/logout', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+        } catch {}
+        localStorage.removeItem('jwtToken');
+        alert('Logged out.');
+        window.location.href = '/login';
+      });
+
+      // Submit form
+      document.getElementById('submitForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('title', document.getElementById('title').value);
+        formData.append('description', document.getElementById('description').value);
+        formData.append('address', document.getElementById('address').value);
+        const imageFile = document.getElementById('image').files[0];
+        if (imageFile) formData.append('image', imageFile);
+
+        try {
+          const response = await fetch('/api/complaints', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+          });
+
+          const contentType = response.headers.get('Content-Type');
+          if (!contentType.includes('application/json')) throw new Error('Unexpected response format');
+
+          const data = await response.json();
+
+          if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Complaint submission failed');
+          }
+
+          submitMessage.classList.remove('d-none', 'alert-danger');
+          submitMessage.classList.add('alert-success');
+          submitMessage.textContent = data.message;
+          setTimeout(() => window.location.href = '/complaints', 1500);
+        } catch (err) {
+          console.error('Submission error:', err);
+          submitMessage.classList.remove('d-none', 'alert-success');
+          submitMessage.classList.add('alert-danger');
+          submitMessage.textContent = `Error: ${err.message}`;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
