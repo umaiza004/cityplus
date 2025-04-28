@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Map - CityPlus</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <link href="/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .marker-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 30px;
+      color: white;
+    }
+    
+    .marker-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .status-pending {
+      background-color: #ffc107;
+    }
+    
+    .status-in-progress {
+      background-color: #0dcaf0;
+    }
+    
+    .status-resolved {
+      background-color: #198754;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <span class="text-light">City</span><span class="text-light">Plus</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="/complaints">Complaints</a></li>
+          <li class="nav-item"><a class="nav-link" href="/submit">Submit</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/map">Map</a></li>
+           
+          <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown">
+              <i class="fas fa-user-circle me-1"></i>
+              <span id="account-email">Guest</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><span class="dropdown-item-text" id="account-type">Not logged in</span></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" id="logout-btn">Logout</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid py-5">
+    <div class="row mb-4">
+      <div class="col-12 text-center">
+        <h1 class="animate__animated animate__fadeIn">Community Issue Map</h1>
+        <p class="lead">Explore reported issues in your community</p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-3 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Filter Map</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">Status</label>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Pending" id="filter-pending" checked>
+                <label class="form-check-label" for="filter-pending">
+                  <span class="badge bg-warning text-dark">Pending</span>
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="In Progress" id="filter-inprogress" checked>
+                <label class="form-check-label" for="filter-inprogress">
+                  <span class="badge bg-info text-dark">In Progress</span>
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Resolved" id="filter-resolved" checked>
+                <label class="form-check-label" for="filter-resolved">
+                  <span class="badge bg-success">Resolved</span>
+                </label>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="search-map" class="form-label">Search</label>
+              <input type="text" class="form-control" id="search-map" placeholder="Search by title or location">
+            </div>
+            <div class="d-grid">
+              <button class="btn btn-primary" id="apply-filters">Apply Filters</button>
+            </div>
+          </div>
+        </div>
+        <div class="card shadow-sm mt-4">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Statistics</h5>
+          </div>
+          <div class="card-body">
+            <div class="row text-center">
+              <div class="col-4">
+                <h2 id="pending-count">0</h2>
+                <p>Pending</p>
+              </div>
+              <div class="col-4">
+                <h2 id="inprogress-count">0</h2>
+                <p>In Progress</p>
+              </div>
+              <div class="col-4">
+                <h2 id="resolved-count">0</h2>
+                <p>Resolved</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <div class="card shadow-sm h-100">
+          <div class="card-body p-0">
+            <div id="community-map" style="height: 700px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="mapComplaintModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Complaint Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="map-complaint-detail-content">
+          <!-- Content will be dynamically inserted here -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <a href="/complaints" class="btn btn-primary">View All Complaints</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white py-4">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5><span class="text-light">City</span><span class="text-light">Plus</span></h5>
+          <p>Making communities better through collaboration</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p>© 2025 CityPlus. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script>
+    let map;
+    let markers = [];
+    let markerClusterGroup;
+    let allComplaints = [];
+    const mapComplaintModal = new bootstrap.Modal(document.getElementById('mapComplaintModal'));
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Check authentication first
+      const token = localStorage.getItem('jwtToken');
+      if (!token) {
+        alert('Please log in to view the community map.');
+        window.location.href = '/login';
+        return;
+      }
+      
+      // Populate account details
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const accountEmail = document.getElementById('account-email');
+        const accountType = document.getElementById('account-type');
+        accountEmail.textContent = payload.email;
+        accountType.textContent = `Role: ${payload.userType}`;
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        localStorage.removeItem('jwtToken');
+        alert('Invalid token. Please log in again.');
+        window.location.href = '/login';
+        return;
+      }
+      
+      // Logout functionality
+      document.getElementById('logout-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        fetch('/api/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+          }
+        })
+          .then(response => response.json())
+          .then(data => {
+            localStorage.removeItem('jwtToken');
+            alert('Logged out successfully.');
+            window.location.href = '/login';
+          })
+          .catch(error => {
+            console.error('Error logging out:', error);
+            localStorage.removeItem('jwtToken');
+            alert('Error logging out. Redirecting to login...');
+            window.location.href = '/login';
+          });
+      });
+      
+      // Continue with map initialization
+      initMap();
+      fetchComplaints();
+      document.getElementById('apply-filters').addEventListener('click', filterMarkers);
+      document.getElementById('search-map').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') filterMarkers();
+      });
+    });
+
+    function initMap() {
+      map = L.map('community-map').setView([28.5155062, 77.2487730], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+      markerClusterGroup = L.markerClusterGroup(); // Initialize marker cluster group
+      map.addLayer(markerClusterGroup);
+    }
+
+    async function fetchComplaints() {
+      try {
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+          console.error('No auth token found');
+          alert('Please log in to view complaint data.');
+          window.location.href = '/login';
+          return;
+        }
+        
+        const response = await fetch('/api/complaints', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log("API Response:", data); // For debugging
+        
+        if (data.success) {
+          allComplaints = data.complaints.map(complaint => {
+            let locationObj = {};
+            try {
+              if (complaint.location) {
+                locationObj = JSON.parse(complaint.location);
+              }
+            } catch (e) {
+              console.error('Error parsing location data for complaint:', complaint.id, e);
+              locationObj = {};
+            }
+            
+            return {
+              ...complaint,
+              location: locationObj,
+              createdAt: complaint.created_at
+            };
+          });
+          
+          console.log("Processed complaints:", allComplaints);
+          addMarkersToMap(allComplaints);
+          updateStats(allComplaints);
+        } else {
+          throw new Error(data.message || 'Failed to fetch complaints');
+        }
+      } catch (error) {
+        console.error('Error fetching complaints:', error);
+        alert('Error loading complaint data. Please try again later.');
+      }
+    }
+
+    function addMarkersToMap(complaints) {
+      markerClusterGroup.clearLayers(); // Clear existing markers
+      markers = [];
+
+      complaints.forEach(complaint => {
+        const { lat, lng } = complaint.location;
+        if (!lat || !lng || isNaN(parseFloat(lat)) || isNaN(parseFloat(lng))) {
+          console.log('Skipping complaint:', complaint.title, 'due to invalid coordinates:', complaint.location);
+          return;
+        }
+
+        const icon = L.divIcon({
+          className: `marker-icon status-${complaint.status.toLowerCase().replace(/\s+/g, '-')}`,
+          html: `<div class="marker-content">${getStatusIcon(complaint.status)}</div>`,
+          iconSize: [30, 30],
+          iconAnchor: [15, 30],
+          popupAnchor: [0, -30]
+        });
+
+        const marker = L.marker([parseFloat(lat), parseFloat(lng)], { icon });
+        marker.bindPopup(`
+          <div class="popup-content">
+            <h6>${complaint.title}</h6>
+            <p class="small">${complaint.location.address || `${complaint.location.lat}, ${complaint.location.lng}`}</p>
+            <button class="btn btn-sm btn-primary view-map-details" data-id="${complaint.id}">View Details</button>
+          </div>
+        `);
+
+        marker.on('popupopen', () => {
+          document.querySelector('.view-map-details')?.addEventListener('click', () => showMapComplaintDetails(complaint));
+        });
+
+        marker.complaintData = complaint;
+        markers.push(marker);
+        markerClusterGroup.addLayer(marker); // Add to cluster group
+      });
+
+      if (markers.length > 0) {
+        map.fitBounds(markerClusterGroup.getBounds().pad(0.1));
+      } else {
+        console.log('No valid markers to display on the map.');
+      }
+    }
+
+    function getStatusIcon(status) {
+      switch(status) {
+        case 'Pending': return '<i class="fas fa-exclamation-circle"></i>';
+        case 'In Progress': return '<i class="fas fa-tools"></i>';
+        case 'Resolved': return '<i class="fas fa-check-circle"></i>';
+        default: return '<i class="fas fa-question-circle"></i>';
+      }
+    }
+
+    function showMapComplaintDetails(complaint) {
+      const detailContent = document.getElementById('map-complaint-detail-content');
+      const date = new Date(complaint.createdAt).toLocaleDateString();
+      const statusClass = getStatusClass(complaint.status);
+
+      detailContent.innerHTML = `
+        <div class="row">
+          <div class="col-md-6">${complaint.imageUrl ? 
+            `<img src="${complaint.imageUrl}" class="img-fluid rounded mb-3" alt="${complaint.title}">` : 
+            `<div class="bg-light text-center py-5 rounded mb-3"><i class="fas fa-image fa-3x text-secondary"></i></div>`}
+          </div>
+          <div class="col-md-6">
+            <h4>${complaint.title}</h4>
+            <span class="badge ${statusClass} mb-3">${complaint.status}</span>
+            <p><strong>Location:</strong> ${complaint.location.address || `${complaint.location.lat}, ${complaint.location.lng}`}</p>
+            <p><strong>Reported on:</strong> ${date}</p>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-12">
+            <h5>Description:</h5>
+            <p>${complaint.description}</p>
+          </div>
+        </div>
+        ${complaint.solution ? 
+          `<div class="row mt-3 border-top pt-3">
+            <div class="col-12">
+              <h5>Solution/Comments:</h5>
+              <p>${complaint.solution}</p>
+            </div>
+          </div>` : ''}
+      `;
+      mapComplaintModal.show();
+    }
+
+    function getStatusClass(status) {
+      switch(status) {
+        case 'Pending': return 'bg-warning text-dark';
+        case 'In Progress': return 'bg-info text-dark';
+        case 'Resolved': return 'bg-success';
+        default: return 'bg-secondary';
+      }
+    }
+
+    function updateStats(complaints) {
+      const pendingCount = complaints.filter(c => c.status === 'Pending').length;
+      const inProgressCount = complaints.filter(c => c.status === 'In Progress').length;
+      const resolvedCount = complaints.filter(c => c.status === 'Resolved').length;
+      document.getElementById('pending-count').textContent = pendingCount;
+      document.getElementById('inprogress-count').textContent = inProgressCount;
+      document.getElementById('resolved-count').textContent = resolvedCount;
+    }
+
+    function filterMarkers() {
+      const pendingChecked = document.getElementById('filter-pending').checked;
+      const inProgressChecked = document.getElementById('filter-inprogress').checked;
+      const resolvedChecked = document.getElementById('filter-resolved').checked;
+      const searchTerm = document.getElementById('search-map').value.toLowerCase();
+
+      const filteredComplaints = allComplaints.filter(complaint => {
+        if (complaint.status === 'Pending' && !pendingChecked) return false;
+        if (complaint.status === 'In Progress' && !inProgressChecked) return false;
+        if (complaint.status === 'Resolved' && !resolvedChecked) return false;
+        if (searchTerm) {
+          return (
+            complaint.title.toLowerCase().includes(searchTerm) ||
+            complaint.description.toLowerCase().includes(searchTerm) ||
+            (complaint.location.address && complaint.location.address.toLowerCase().includes(searchTerm))
+          );
+        }
+        return true;
+      });
+
+      addMarkersToMap(filteredComplaints);
+      updateStats(filteredComplaints);
+    }
+  </script>
+</body>
+</html>

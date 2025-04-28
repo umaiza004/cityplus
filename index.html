@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CityPlus - Community Solutions</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <span class="text-light">City</span><span class="text-light">Plus</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/complaints">Complaints</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/submit">Submit</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/map">Map</a>
+          </li>
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/contact">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/login">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/register">Register</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="hero-section text-center text-white py-5">
+    <div class="container py-5">
+      <h1 class="display-3 fw-bold animate__animated animate__fadeIn">Welcome to <span class="text-light">City</span><span class="text-light">Plus</span></h1>
+      <p class="lead my-4 animate__animated animate__fadeIn animate__delay-1s">Report and track community issues to create a better living environment</p>
+      <div class="animate__animated animate__fadeIn animate__delay-2s">
+        <a href="/submit" id="reportIssueBtn" class="btn btn-warning btn-lg me-2">Report an Issue</a>
+        <a href="/map" class="btn btn-outline-light btn-lg">View Map</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-5">
+    <div class="row text-center mb-5">
+      <div class="col-12">
+        <h2 class="section-title">How It Works</h2>
+      </div>
+    </div>
+    
+    <div class="row g-4">
+      <div class="col-md-4 feature-card">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body text-center p-4">
+            <div class="feature-icon mb-3">
+              <i class="fas fa-edit fa-3x text-primary"></i>
+            </div>
+            <h4>Submit</h4>
+            <p>Report community issues with details and images</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4 feature-card">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body text-center p-4">
+            <div class="feature-icon mb-3">
+              <i class="fas fa-map-marked-alt fa-3x text-primary"></i>
+            </div>
+            <h4>Track</h4>
+            <p>View all reported issues on an interactive map</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4 feature-card">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body text-center p-4">
+            <div class="feature-icon mb-3">
+              <i class="fas fa-check-circle fa-3x text-primary"></i>
+            </div>
+            <h4>Resolve</h4>
+            <p>Get updates when your reported issues are solved</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+ 
+<!-- Featured Events Carousel -->
+<div class="container py-5">
+  <div class="row text-center mb-4">
+    <div class="col-12">
+      <h2 class="section-title">Upcoming Events</h2>
+    </div>
+  </div>
+  <div id="eventsCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner" id="carouselItems">
+      <div class="carousel-item active">
+        <div class="text-center">
+          <p>Loading events...</p>
+        </div>
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#eventsCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#eventsCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+  <div class="text-center mt-4">
+    <a href="/events-news" class="btn btn-primary">View All Events & News</a>
+  </div>
+</div>
+
+<script>
+  // ... other scripts ...
+  async function fetchFeaturedEvents() {
+    try {
+      const response = await fetch('/api/events-news?limit=3');
+      const data = await response.json();
+      const carousel = document.getElementById('carouselItems');
+      if (data.success && data.items.length) {
+        carousel.innerHTML = data.items.map((item, index) => `
+          <div class="carousel-item ${index === 0 ? 'active' : ''}">
+            <div class="container">
+              <div class="row align-items-center">
+                <div class="col-md-6">
+                  <img src="${item.image_url || '/images/default-event.jpg'}" class="img-fluid rounded" alt="${item.title}" style="max-height: 300px; object-fit: cover;">
+                </div>
+                <div class="col-md-6 text-center text-md-start">
+                  <h4>${item.title}</h4>
+                  <p>${item.description.substring(0, 100)}...</p>
+                  <p><strong>${new Date(item.date).toLocaleDateString()}</strong></p>
+                  <a href="/events-news" class="btn btn-primary">Learn More</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        carousel.innerHTML = '<div class="carousel-item active"><div class="text-center"><p>No events available.</p></div></div>';
+      }
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      carousel.innerHTML = '<div class="carousel-item active"><div class="text-center"><p>Error loading events.</p></div></div>';
+    }
+  }
+  fetchFeaturedEvents();
+</script>
+
+  <footer class="bg-dark text-white py-4">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5><span class="text-light">City</span><span class="text-light">Plus</span></h5>
+          <p>Making communities better through collaboration</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p>© 2025 CityPlus. All rights reserved.</p>
+          <div class="social-icons mt-3">
+            <a href="https://www.facebook.com/" target="_blank" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.twitter.com/" target="_blank" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.instagram.com/uuhhhmaiza" target="_blank" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.linkedin.com/company/" target="_blank" class="text-white"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      // Set active class for current page
+      const currentPath = window.location.pathname;
+      document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === currentPath || (href === '/' && currentPath === '')) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CityPlus - Register</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <span class="text-light">City</span><span class="text-light">Plus</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/complaints">Complaints</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/submit">Submit</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/map">Map</a>
+          </li>
+           
+          <li class="nav-item">
+            <a class="nav-link" href="/contact">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/login">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/register">Register</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card shadow-sm animate__animated animate__fadeIn">
+          <div class="card-body p-5">
+            <h2 class="text-center mb-4">Register for CityPlus</h2>
+            <div id="registerMessage" class="alert d-none" role="alert"></div>
+            <div id="adminWarning" class="alert alert-warning d-none" role="alert">
+              Only one admin user is allowed. The admin role is already taken.
+            </div>
+            <form id="registerForm">
+              <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="email" placeholder="Enter your email" required>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" placeholder="Enter your password" required>
+              </div>
+              <div class="mb-3">
+                <label for="userType" class="form-label">User Type</label>
+                <select class="form-select" id="userType" required>
+                  <option value="" disabled selected>Select user type</option>
+                  <option value="resident">Resident</option>
+                  <option value="admin" id="adminOption">Admin</option>
+                </select>
+              </div>
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">Register</button>
+              </div>
+            </form>
+            <p class="text-center mt-3">
+              Already have an account? <a href="/login">Login here</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white py-4">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5><span class="text-light">City</span><span class="text-light">Plus</span></h5>
+          <p>Making communities better through collaboration</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p>© 2025 CityPlus. All rights reserved.</p>
+          <div class="social-icons mt-3">
+            <a href="https://www.facebook.com/" target="_blank" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.twitter.com/" target="_blank" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.instagram.com/uuhhhmaiza" target="_blank" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.linkedin.com/company/" target="_blank" class="text-white"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Check for existing admin on page load (client-side hint)
+    function checkAdminStatus() {
+      fetch('/api/users') // Fetch current users to check admin status
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.users.some(user => user.userType === 'admin')) {
+            const adminOption = document.getElementById('adminOption');
+            const adminWarning = document.getElementById('adminWarning');
+            adminOption.disabled = true;
+            adminWarning.classList.remove('d-none');
+          }
+        })
+        .catch(error => console.error('Error checking admin status:', error));
+    }
+
+    // Handle form submission
+    document.getElementById('registerForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const userType = document.getElementById('userType').value;
+      const messageDiv = document.getElementById('registerMessage');
+
+      try {
+        const response = await fetch('/api/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password, userType })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          // Store the JWT token if provided by the backend (future enhancement)
+          if (data.token) {
+            localStorage.setItem('jwtToken', data.token);
+          }
+          messageDiv.classList.remove('d-none', 'alert-danger');
+          messageDiv.classList.add('alert-success');
+          messageDiv.textContent = 'Registration successful! Redirecting to login...';
+          setTimeout(() => window.location.href = '/login', 1000);
+        } else {
+          throw new Error(data.message || 'Registration failed');
+        }
+      } catch (error) {
+        console.error('Error registering:', error);
+        messageDiv.classList.remove('d-none', 'alert-success');
+        messageDiv.classList.add('alert-danger');
+        messageDiv.textContent = `Error: ${error.message}`;
+      }
+    });
+
+    // Run admin check on page load
+    checkAdminStatus();
+  </script>
+</body>
+</html>
