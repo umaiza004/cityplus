@@ -16,80 +16,179 @@ const db = new sqlite3.Database('cityplus.db', (err) => {
     return;
   }
   console.log('✅ Connected to SQLite');
-  // Create complaints table
-  db.run(`
-    CREATE TABLE IF NOT EXISTS complaints (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      description TEXT NOT NULL,
-      location TEXT,
-      image_url TEXT,
-      status TEXT DEFAULT 'Pending',
-      solution TEXT DEFAULT '',
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      submitted_by TEXT NOT NULL
-    )
-  `, (err) => {
-    if (err) {
-      console.error('❌ Error creating complaints table:', err.message);
-    } else {
-      console.log('✅ Complaints table created or already exists');
+
+  // Create tables
+  const createTables = () => {
+    // Complaints table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS complaints (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        location TEXT,
+        image_url TEXT,
+        status TEXT DEFAULT 'Pending',
+        solution TEXT DEFAULT '',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        submitted_by TEXT NOT NULL
+      )
+    `, (err) => {
+      if (err) {
+        console.error('❌ Error creating complaints table:', err.message);
+      } else {
+        console.log('✅ Complaints table created or already exists');
+      }
+    });
+
+    // Users table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        userType TEXT NOT NULL CHECK(userType IN ('resident', 'admin')),
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `, (err) => {
+      if (err) {
+        console.error('❌ Error creating users table:', err.message);
+      } else {
+        console.log('✅ Users table created or already exists');
+      }
+    });
+
+    // EventNews table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS EventNews (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        type TEXT NOT NULL,
+        date TEXT NOT NULL,
+        time TEXT,
+        location TEXT,
+        image_url TEXT,
+        description TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `, (err) => {
+      if (err) {
+        console.error('❌ Error creating EventNews table:', err.message);
+      } else {
+        console.log('✅ EventNews table created or already exists');
+      }
+    });
+
+    // Volunteers table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS Volunteers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        event_id INTEGER NOT NULL,
+        role TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (event_id) REFERENCES EventNews(id)
+      )
+    `, (err) => {
+      if (err) {
+        console.error('❌ Error creating Volunteers table:', err.message);
+      } else {
+        console.log('✅ Volunteers table created or already exists');
+      }
+    });
+  };
+
+  // Seed the database with initial data
+  const seedDatabase = async () => {
+    try {
+      console.log('🌱 Starting database seeding...');
+
+      // Seed users table
+      const adminEmail = 'admin@example.com';
+      const residentEmail = 'resident@example.com';
+      const adminPassword = await bcrypt.hash('adminpass', 10);
+      const residentPassword = await bcrypt.hash('residentpass', 10);
+
+      db.get('SELECT COUNT(*) as count FROM users', (err, row) => {
+        if (err) throw err;
+        if (row.count === 0) {
+          console.log('🌱 Seeding users...');
+          db.run('INSERT INTO users (email, password, userType) VALUES (?, ?, ?)', [adminEmail, adminPassword, 'admin']);
+          db.run('INSERT INTO users (email, password, userType) VALUES (?, ?, ?)', [residentEmail, residentPassword, 'resident']);
+        }
+      });
+
+      // Seed complaints table
+      db.get('SELECT COUNT(*) as count FROM complaints', (err, row) => {
+        if (err) throw err;
+        if (row.count === 0) {
+          console.log('🌱 Seeding complaints...');
+          const complaints = [
+            {
+              title: 'Pothole on Main Street',
+              description: 'Large pothole causing road hazard',
+              location: JSON.stringify({ address: '123 Main St', lat: 40.7128, lng: -74.0060 }),
+              image_url: '/uploads/pothole.jpg',
+              status: 'Pending',
+              submitted_by: residentEmail
+            },
+            {
+              title: 'Broken Streetlight',
+              description: 'Streetlight at corner not working',
+              location: JSON.stringify({ address: '456 Elm St', lat: 40.7129, lng: -74.0061 }),
+              image_url: null,
+              status: 'In Progress',
+              submitted_by: residentEmail
+            }
+          ];
+          complaints.forEach(c => {
+            db.run('INSERT INTO complaints (title, description, location, image_url, status, submitted_by) VALUES (?, ?, ?, ?, ?, ?)',
+              [c.title, c.description, c.location, c.image_url, c.status, c.submitted_by]);
+          });
+        }
+      });
+
+      // Seed EventNews table
+      db.get('SELECT COUNT(*) as count FROM EventNews', (err, row) => {
+        if (err) throw err;
+        if (row.count === 0) {
+          console.log('🌱 Seeding events...');
+          const events = [
+            {
+              title: 'Tree Planting Day',
+              type: 'event',
+              date: '2025-05-15',
+              time: '10:00 AM',
+              location: 'Central Park',
+              image_url: '/uploads/tree-planting.jpg',
+              description: 'Join us to plant trees and beautify the city!'
+            },
+            {
+              title: 'Community Cleanup',
+              type: 'event',
+              date: '2025-06-01',
+              time: '9:00 AM',
+              location: 'Downtown Square',
+              image_url: null,
+              description: 'Help keep our city clean!'
+            }
+          ];
+          events.forEach(e => {
+            db.run('INSERT INTO EventNews (title, type, date, time, location, image_url, description) VALUES (?, ?, ?, ?, ?, ?, ?)',
+              [e.title, e.type, e.date, e.time, e.location, e.image_url, e.description]);
+          });
+        }
+      });
+
+      console.log('🌱 Database seeding completed');
+    } catch (error) {
+      console.error('❌ Error seeding database:', error.stack);
     }
-  });
-  // Create users table
-  db.run(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      email TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL,
-      userType TEXT NOT NULL CHECK(userType IN ('resident', 'admin')),
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `, (err) => {
-    if (err) {
-      console.error('❌ Error creating users table:', err.message);
-    } else {
-      console.log('✅ Users table created or already exists');
-    }
-  });
-  // Create EventNews table
-  db.run(`
-    CREATE TABLE IF NOT EXISTS EventNews (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      type TEXT NOT NULL,
-      date TEXT NOT NULL,
-      time TEXT,
-      location TEXT,
-      image_url TEXT,
-      description TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `, (err) => {
-    if (err) {
-      console.error('❌ Error creating EventNews table:', err.message);
-    } else {
-      console.log('✅ EventNews table created or already exists');
-    }
-  });
-  // Create Volunteers table
-  db.run(`
-    CREATE TABLE IF NOT EXISTS Volunteers (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL,
-      event_id INTEGER NOT NULL,
-      role TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (event_id) REFERENCES EventNews(id)
-    )
-  `, (err) => {
-    if (err) {
-      console.error('❌ Error creating Volunteers table:', err.message);
-    } else {
-      console.log('✅ Volunteers table created or already exists');
-    }
-  });
+  };
+
+  // Create tables and seed data
+  createTables();
+  setTimeout(seedDatabase, 1000); // Delay to ensure tables are created
 });
 
 // Multer setup with limits
